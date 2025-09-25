@@ -30,6 +30,17 @@ router.post("/", async (req, res) => {
     const { returnUrl } = body as { returnUrl?: string };
 
     try {
+      // Use production key for production, sandbox for development
+      const autumnKey = process.env.NODE_ENV === 'production' 
+        ? process.env.AUTUMN_PRODUCTION_SECRET_KEY 
+        : process.env.AUTUMN_SANDBOX_SECRET_KEY;
+
+      if (!autumnKey) {
+        return res.status(500).json({
+          error: "Autumn API key not configured"
+        });
+      }
+
       const result = await autumn.customers.billingPortal(session.user.id, {
         return_url: returnUrl || undefined,
       } as any);
